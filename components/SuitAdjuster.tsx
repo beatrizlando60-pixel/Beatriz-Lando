@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Suit, SuitState } from '../types';
-import { Check, X, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn } from 'lucide-react';
+import { Check, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ZoomIn, Wand2, Loader2 } from 'lucide-react';
+import { generateSuitPhoto } from '../services/geminiService';
 
 interface SuitAdjusterProps {
   imageSrc: string;
@@ -9,6 +10,7 @@ interface SuitAdjusterProps {
   initialState?: SuitState | null;
   onSave: (suitId: string, state: SuitState) => void;
   onCancel: () => void;
+  onAiGenerated: (newImageSrc: string) => void;
 }
 
 const SuitAdjuster: React.FC<SuitAdjusterProps> = ({ 
@@ -17,7 +19,8 @@ const SuitAdjuster: React.FC<SuitAdjusterProps> = ({
   initialSuitId,
   initialState,
   onSave, 
-  onCancel 
+  onCancel,
+  onAiGenerated
 }) => {
   // Initialize state with passed props or defaults
   const [selectedSuit, setSelectedSuit] = useState<Suit>(() => {
@@ -31,6 +34,7 @@ const SuitAdjuster: React.FC<SuitAdjusterProps> = ({
   const [scale, setScale] = useState(initialState?.scale ?? 1.0);
   const [posX, setPosX] = useState(initialState?.x ?? 0);
   const [posY, setPosY] = useState(initialState?.y ?? 10);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
   
   const handleSave = () => {
     onSave(selectedSuit.id, {
@@ -39,6 +43,19 @@ const SuitAdjuster: React.FC<SuitAdjusterProps> = ({
       x: posX,
       y: posY
     });
+  };
+
+  const handleAiGenerate = async () => {
+    setIsAiGenerating(true);
+    try {
+      const result = await generateSuitPhoto(imageSrc, selectedSuit.name);
+      onAiGenerated(result);
+    } catch (error) {
+      console.error(error);
+      alert("Não foi possível gerar o terno com IA. Tente novamente ou use o ajuste manual.");
+    } finally {
+      setIsAiGenerating(false);
+    }
   };
 
   return (
@@ -66,6 +83,13 @@ const SuitAdjuster: React.FC<SuitAdjusterProps> = ({
                 >
                    <img src={selectedSuit.src} alt="Suit" className="w-full h-auto" />
                 </div>
+                
+                {isAiGenerating && (
+                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-20 backdrop-blur-sm">
+                    <Loader2 className="animate-spin text-white mb-2" size={32} />
+                    <p className="text-white font-medium text-sm">A IA está vestindo o terno...</p>
+                  </div>
+                )}
              </div>
         </div>
       </div>
@@ -86,6 +110,26 @@ const SuitAdjuster: React.FC<SuitAdjusterProps> = ({
               <img src={suit.src} alt={suit.name} className="w-full h-full object-contain object-top" />
             </button>
           ))}
+        </div>
+
+        {/* AI Action */}
+        <button
+          onClick={handleAiGenerate}
+          disabled={isAiGenerating}
+          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2 group border border-white/10"
+        >
+          {isAiGenerating ? (
+            <Loader2 className="animate-spin" size={18} />
+          ) : (
+            <Wand2 size={18} className="group-hover:rotate-12 transition-transform" />
+          )}
+          {isAiGenerating ? "Processando..." : "Ajuste Automático com IA"}
+        </button>
+
+        <div className="relative flex items-center py-2">
+          <div className="flex-grow border-t border-slate-700"></div>
+          <span className="flex-shrink-0 mx-4 text-slate-500 text-xs uppercase font-medium">Ou Ajuste Manual</span>
+          <div className="flex-grow border-t border-slate-700"></div>
         </div>
 
         {/* Sliders */}
@@ -118,9 +162,9 @@ const SuitAdjuster: React.FC<SuitAdjusterProps> = ({
 
         <button 
           onClick={handleSave}
-          className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2"
+          className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2"
         >
-          <Check size={18} /> Aplicar Terno
+          <Check size={18} /> Confirmar Ajuste
         </button>
       </div>
     </div>

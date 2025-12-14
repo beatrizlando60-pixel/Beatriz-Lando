@@ -6,58 +6,47 @@ import SuitAdjuster from './components/SuitAdjuster';
 import { enhancePhoto } from './services/geminiService';
 import { Upload, Camera, Eraser, Download, RefreshCw, AlertCircle, Grid, MonitorDown, Shirt, Sun } from 'lucide-react';
 
-// Hardcoded suits (Placeholders that look reasonable)
+// Hardcoded suits (Realistic Photos)
 const SUITS: Suit[] = [
   { 
-    id: 'suit-dark-blue', 
-    name: 'Azul Escuro', 
-    src: 'https://png.pngtree.com/png-vector/20230922/ourmid/pngtree-man-suit-blue-png-image_10143891.png' 
+    id: 'real-suit-black', 
+    name: 'Preto Executivo', 
+    src: 'https://freepngimg.com/thumb/suit/2-suit-png-image.png' 
   },
   { 
-    id: 'suit-black', 
-    name: 'Preto Clássico', 
-    src: 'https://png.pngtree.com/png-vector/20220518/ourmid/pngtree-black-suit-png-image_4661899.png' 
+    id: 'real-suit-navy', 
+    name: 'Azul Marinho', 
+    src: 'https://freepngimg.com/thumb/suit/4-suit-png-image.png' 
   },
   { 
-    id: 'suit-grey', 
-    name: 'Cinza', 
-    src: 'https://png.pngtree.com/png-vector/20230531/ourmid/pngtree-gray-suit-formal-attire-png-image_7114251.png' 
+    id: 'real-suit-grey', 
+    name: 'Cinza Clássico', 
+    src: 'https://freepngimg.com/thumb/suit/3-suit-png-image.png' 
   },
   { 
-    id: 'suit-navy-tie', 
+    id: 'real-suit-red-tie', 
     name: 'Gravata Vermelha', 
-    src: 'https://png.pngtree.com/png-vector/20221226/ourmid/pngtree-mens-suit-with-red-tie-png-image_6538356.png' 
+    src: 'https://freepngimg.com/thumb/suit/6-suit-png-image.png' 
   },
   { 
-    id: 'suit-tux', 
+    id: 'real-suit-blue-tie', 
+    name: 'Gravata Azul', 
+    src: 'https://freepngimg.com/thumb/suit/12-suit-png-image.png' 
+  },
+  { 
+    id: 'real-suit-tux', 
     name: 'Smoking', 
-    src: 'https://png.pngtree.com/png-vector/20230906/ourmid/pngtree-black-men-suit-png-image_9971844.png' 
-  },
-  // Additional Suits
-  {
-    id: 'suit-navy-classic',
-    name: 'Azul Marinho',
-    src: 'https://png.pngtree.com/png-vector/20231004/ourmid/pngtree-navy-blue-formal-suit-png-image_10078044.png'
+    src: 'https://freepngimg.com/thumb/suit/13-suit-png-image.png' 
   },
   {
-    id: 'suit-beige',
-    name: 'Bege',
-    src: 'https://png.pngtree.com/png-vector/20240125/ourmid/pngtree-mens-suit-object-png-image_11547636.png'
+    id: 'real-suit-pattern',
+    name: 'Cinza Padrão',
+    src: 'https://freepngimg.com/thumb/suit/5-suit-png-image.png'
   },
   {
-    id: 'suit-charcoal',
-    name: 'Grafite',
-    src: 'https://png.pngtree.com/png-vector/20230414/ourmid/pngtree-grey-formal-suit-png-image_6697666.png'
-  },
-  {
-    id: 'suit-pinstripe',
-    name: 'Risca de Giz',
-    src: 'https://png.pngtree.com/png-vector/20230928/ourmid/pngtree-formal-suits-for-men-png-image_10150125.png'
-  },
-  {
-    id: 'suit-brown',
-    name: 'Marrom',
-    src: 'https://png.pngtree.com/png-vector/20231102/ourmid/pngtree-formal-suits-for-men-png-image_10334888.png'
+     id: 'real-suit-dark',
+     name: 'Preto Moderno',
+     src: 'https://freepngimg.com/thumb/suit/15-suit-png-image.png'
   }
 ];
 
@@ -160,6 +149,15 @@ const App: React.FC = () => {
   const saveSuit = (id: string, state: SuitState) => {
     setActiveSuitId(id);
     setSuitState(state);
+    setState(AppState.RESULT);
+  };
+  
+  // Callback when AI generates a full suited image
+  const handleAiSuitGenerated = (newImage: string) => {
+    setCroppedImage(newImage);
+    // Since AI burned the suit into the image, we clear the manual suit overlay
+    setActiveSuitId(null);
+    setSuitState(null);
     setState(AppState.RESULT);
   };
 
@@ -313,6 +311,7 @@ const App: React.FC = () => {
               initialState={suitState}
               onSave={saveSuit}
               onCancel={() => setState(AppState.RESULT)}
+              onAiGenerated={handleAiSuitGenerated}
            />
         )}
 
