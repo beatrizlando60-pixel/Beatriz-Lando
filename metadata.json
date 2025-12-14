@@ -1,0 +1,7 @@
+{
+  "name": "Foto 3x4 Studio IA",
+  "description": "Transforme suas selfies em fotos 3x4 profissionais para documentos. Use recorte inteligente e IA para remover o fundo e melhorar a iluminação.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
